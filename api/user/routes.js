@@ -44,8 +44,8 @@ router.get(
 router.post(
   "/register",
   upload.single("image"),
-  inputValidator([...usernameValidator, ...passwordValidator], true),
-  FieldValidation,
+  // inputValidator([...usernameValidator, ...passwordValidator], true),
+  // FieldValidation,
   createUser
 );
 router.post(

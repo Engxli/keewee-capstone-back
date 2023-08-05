@@ -6,10 +6,18 @@ const app = express();
 const notFound = require("./middlewares/notFoundHandler");
 const errorHandler = require("./middlewares/errorHandler");
 const userRoutes = require("./api/user/routes");
+const chatRoutes = require("./api/chat/routes");
 const config = require("./config/keys");
 const passport = require("passport");
 const { localStrategy, jwtStrategy } = require("./middlewares/passport");
-
+//
+const http = require("http");
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+const io = new Server(server, {
+  cors: { origin: "*" },
+});
+//
 app.use(cors());
 connectDb();
 app.use(express.json());
@@ -20,13 +28,20 @@ passport.use("local", localStrategy);
 passport.use(jwtStrategy);
 
 // Everything with the word temp is a placeholder that you'll change in accordance with your project
-app.use("/user", userRoutes);
+app.use("/auth", userRoutes);
+app.use("/chat", chatRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
 
-app.listen(config.PORT, () => {
-  console.log(`The application is running on ${config.PORT}`);
+io.on("connection", (socket) => {
+  console.log("a user connected");
+  socket.on("chat", (data) => {
+    socket.broadcast.emit("recieve", data);
+  });
 });
 
+server.listen(config.PORT, () => {
+  console.log(`The application is running on ${config.PORT}`);
+});
 module.exports = app;
