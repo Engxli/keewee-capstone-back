@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const JWTStrategy = require("passport-jwt").Strategy;
 const { fromAuthHeaderAsBearerToken } = require("passport-jwt").ExtractJwt;
 const config = require("../config/keys");
-const Temp = require("../models/Temp");
+const Temp = require("../models/User");
 
 exports.localStrategy = new LocalStrategy(
   async (username, password, done) => {
