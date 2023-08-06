@@ -50,8 +50,14 @@ exports.getUserChat = async (req, res, next) => {
 exports.getChat = async (req, res, next) => {
   try {
     const chat = await PrivateChat.findById(req.params.chatId)
-      .populate("members", "username _id image")
-      .populate("msgs");
+      .populate("members msgs", "username _id image")
+      .populate({
+        path: "msgs",
+        populate: {
+          path: "from",
+          select: "image username",
+        },
+      });
     return res.status(200).json(chat);
   } catch (error) {
     next(error);
@@ -69,7 +75,7 @@ exports.sendChat = async (req, res, next) => {
       text: req.body.msg,
     });
     await chat.updateOne({ $push: { msgs: msg } });
-    return res.status(204).end();
+    return res.status(201).json(await msg.populate("from", "username image"));
   } catch (error) {
     next(error);
   }

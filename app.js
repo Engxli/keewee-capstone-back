@@ -10,6 +10,7 @@ const chatRoutes = require("./api/chat/routes");
 const config = require("./config/keys");
 const passport = require("passport");
 const { localStrategy, jwtStrategy } = require("./middlewares/passport");
+const path = require("path");
 //
 const http = require("http");
 const server = http.createServer(app);
@@ -28,6 +29,7 @@ passport.use("local", localStrategy);
 passport.use(jwtStrategy);
 
 // Everything with the word temp is a placeholder that you'll change in accordance with your project
+app.use("/media", express.static(path.join(__dirname, "media")));
 app.use("/auth", userRoutes);
 app.use("/chat", chatRoutes);
 
