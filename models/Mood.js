@@ -3,7 +3,8 @@ const { model, Schema } = require("mongoose");
 
 const MoodSchema = new Schema({
   name: { type: String, required: true },
-  amenities: [{ type: Schema.Types.ObjectId, ref: "Amenity" }],
+
+  //relation
   places: [{ type: Schema.Types.ObjectId, ref: "Place" }],
 });
 
