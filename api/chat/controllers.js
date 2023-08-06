@@ -1,5 +1,4 @@
 const Message = require("../../models/Message");
-const { populate } = require("../../models/Post");
 const PrivateChat = require("../../models/PrivateChat");
 const User = require("../../models/User");
 
