@@ -2,15 +2,40 @@ const Message = require("../../models/Message");
 const PrivateChat = require("../../models/PrivateChat");
 const User = require("../../models/User");
 
+// exports.getMyChats = async (req, res, next) => {
+//   try {
+//     const chats = await User.findById(req.user._id)
+//       .select("chats -_id")
+//       .populate({
+//         path: "chats",
+//         populate: "members",
+//         select: "updatedAt username _id image",
+//       });
+//     return res.status(200).json(chats.chats);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 exports.getMyChats = async (req, res, next) => {
   try {
     const chats = await User.findById(req.user._id)
       .select("chats -_id")
       .populate({
         path: "chats",
-        populate: "members",
-        select: "username _id image",
+        populate: [
+          { path: "members", select: "username _id image" },
+          {
+            path: "msgs",
+            ref: "Message",
+            options: { sort: { createdAt: -1 }, limit: 1 },
+            populate: { path: "from", select: "username _id" },
+          },
+        ],
+        select: "updatedAt",
       });
+
+    // You can further process the chats if needed, e.g., to reformat the messages.
     return res.status(200).json(chats.chats);
   } catch (error) {
     next(error);
