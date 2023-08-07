@@ -15,6 +15,8 @@ const PlaceSchema = new Schema({
 
   amenitiesRatings: [{ type: Schema.Types.ObjectId, ref: "AmenityRating" }],
 
+  amenities: [{ type: Schema.Types.ObjectId, ref: "Amenity" }],
+
   posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
 
   moods: [{ type: Schema.Types.ObjectId, ref: "Mood" }],
