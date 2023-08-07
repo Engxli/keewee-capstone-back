@@ -4,8 +4,8 @@ const { model, Schema } = require("mongoose");
 const PostSchema = new Schema(
   {
     image: { type: String, required: true },
-    mood: { type: Schema.Types.ObjectId, ref: "Mood" },
-    rate: { type: Schema.Types.ObjectId, ref: "Rating" },
+
+    //relation
     user: { type: Schema.Types.ObjectId, ref: "User" },
   },
   { timestamps: true }

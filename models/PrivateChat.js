@@ -3,6 +3,7 @@ const { model, Schema } = require("mongoose");
 
 const PrivateChatSchema = new Schema(
   {
+    //relation
     members: [{ type: Schema.Types.ObjectId, ref: "User" }],
     msgs: [{ type: Schema.Types.ObjectId, ref: "Message" }],
   },

@@ -3,10 +3,12 @@ const { model, Schema } = require("mongoose");
 
 const MessageSchema = new Schema(
   {
+    text: { type: String, required: true },
+
+    //relation
     publicChat: { type: Schema.Types.ObjectId, ref: "PublicChat" },
     privateChat: { type: Schema.Types.ObjectId, ref: "PrivateChat" },
     from: { type: Schema.Types.ObjectId, ref: "User" },
-    text: { type: String, required: true },
   },
   { timestamps: true }
 );

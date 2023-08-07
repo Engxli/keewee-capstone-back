@@ -3,6 +3,7 @@ const { model, Schema } = require("mongoose");
 
 const HistorySchema = new Schema(
   {
+    // relation
     user: { type: Schema.Types.ObjectId, ref: "User" },
     place: { type: Schema.Types.ObjectId, ref: "Place" },
   },
