@@ -9,12 +9,23 @@ exports.getAllPlaces = async (req, res, next) => {
   }
 };
 
+exports.getPlaceById = async (req, res, next) => {
+  try {
+    const { placeId } = req.params;
+    const place = await Place.findById(placeId);
+    // .populate("createdBy", "username");
+    res.status(200).json(place);
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.createPlace = async (req, res, next) => {
   try {
     if (req.file) {
       req.body.image = `${req.file.path}`;
     }
-    const existingTrip = await Place.findOne({
+    const existingPlace = await Place.findOne({
       title: req.body.title,
     });
 
