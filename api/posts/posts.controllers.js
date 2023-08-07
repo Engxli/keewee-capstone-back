@@ -3,7 +3,7 @@ const Place = require('../../models/Place')
 
 exports.getAllPosts = async (req, res, next) => {
     try {
-        const posts = Post.find().populate("username image");
+        const posts = await Post.find()
         res.status(200).json(posts);
     } catch (error) {
         next(error)
@@ -17,7 +17,7 @@ exports.createPost = async (req, res, next) => {
 
         req.body.user = req.user._id;
         if (req.file) {
-            req.body.image = `${req.file.path}`;
+            req.body.image = `${req.file.path.replace("\\", "/")}`;
         }
         const place = await Place.findOne({ name: req.body.name })
         if (!place) { return res.status(404).json({ message: "place is not found" }); }
@@ -73,3 +73,4 @@ exports.deletePost = async (req, res, next) => {
         next(error);
     }
 };
+
