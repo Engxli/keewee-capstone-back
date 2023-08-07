@@ -7,6 +7,7 @@ const notFound = require("./middlewares/notFoundHandler");
 const errorHandler = require("./middlewares/errorHandler");
 const userRoutes = require("./api/user/routes");
 const chatRoutes = require("./api/chat/routes");
+const postsRoutes = require("./api/posts/posts.router")
 const placeRoutes = require("./api/place/routes");
 const moodRoutes = require("./api/mood/routes");
 const config = require("./config/keys");
@@ -34,6 +35,7 @@ passport.use(jwtStrategy);
 app.use("/media", express.static(path.join(__dirname, "media")));
 app.use("/auth", userRoutes);
 app.use("/chat", chatRoutes);
+app.use("/posts", postsRoutes)
 app.use("/place", placeRoutes);
 app.use("/mood", moodRoutes);
 
