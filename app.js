@@ -7,6 +7,8 @@ const notFound = require("./middlewares/notFoundHandler");
 const errorHandler = require("./middlewares/errorHandler");
 const userRoutes = require("./api/user/routes");
 const chatRoutes = require("./api/chat/routes");
+const placeRoutes = require("./api/place/routes");
+const moodRoutes = require("./api/mood/routes");
 const config = require("./config/keys");
 const passport = require("passport");
 const { localStrategy, jwtStrategy } = require("./middlewares/passport");
@@ -32,6 +34,8 @@ passport.use(jwtStrategy);
 app.use("/media", express.static(path.join(__dirname, "media")));
 app.use("/auth", userRoutes);
 app.use("/chat", chatRoutes);
+app.use("/place", placeRoutes);
+app.use("/mood", moodRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
@@ -46,4 +50,3 @@ io.on("connection", (socket) => {
 server.listen(config.PORT, () => {
   console.log(`The application is running on ${config.PORT}`);
 });
-module.exports = app;
