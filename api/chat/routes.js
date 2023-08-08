@@ -1,6 +1,14 @@
 const express = require("express");
 const passport = require("passport");
-const { getMyChats, getUserChat, getChat, sendChat } = require("./controllers");
+const {
+  getMyChats,
+  getUserChat,
+  getChat,
+  sendChat,
+  getPublicChats,
+  sendPublicChat,
+  getPlaceChat,
+} = require("./controllers");
 const User = require("../../models/User");
 const router = express.Router();
 
@@ -31,6 +39,22 @@ router.post(
   "/msgs/send/:chatId",
   passport.authenticate("jwt", { session: false }),
   sendChat
+);
+///////////////////
+router.get(
+  "/publicChats",
+  passport.authenticate("jwt", { session: false }),
+  getPublicChats
+);
+router.get(
+  "/publicChat/:placeId",
+  passport.authenticate("jwt", { session: false }),
+  getPlaceChat
+);
+router.post(
+  "/publicChat/:placeId",
+  passport.authenticate("jwt", { session: false }),
+  sendPublicChat
 );
 
 module.exports = router;
