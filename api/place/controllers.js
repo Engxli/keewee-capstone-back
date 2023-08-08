@@ -1,4 +1,8 @@
+
+const Mood = require("../../models/Mood");
+
 const History = require("../../models/History");
+
 const Place = require("../../models/Place");
 const Post = require("../../models/Post");
 const PublicChat = require("../../models/PublicChat");
@@ -16,7 +20,6 @@ exports.getPlaceById = async (req, res, next) => {
   try {
     const { placeId } = req.params;
     const place = await Place.findById(placeId);
-    // .populate("createdBy", "username");
     res.status(200).json(place);
   } catch (error) {
     next(error);
@@ -48,6 +51,32 @@ exports.createPlace = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.addMoodToPlace = async (req, res, next) => {
+  try {
+    const { moodId, placeId } = req.params;
+
+    if (!placeId || !moodId) {
+      return res.status(400).json({ error: "Required IDs are missing" });
+    }
+    // Checking if the mood exists
+    const mood = await Mood.findById(moodId);
+    if (!mood) {
+      return res.status(404).json({ error: "Mood not found" });
+    }
+
+    // Add the mood to the place's mood array
+    await Place.findByIdAndUpdate(placeId, {
+      $push: { moods: moodId },
+    });
+
+    // Add the place to the mood's places array
+    await Mood.findByIdAndUpdate(moodId, {
+      $push: { places: placeId },
+    });
+
+    res.status(204).end();
+
 
 exports.checkIn = async (req, res, next) => {
   try {
@@ -83,6 +112,7 @@ exports.checkIn = async (req, res, next) => {
     await req.user.updateOne({ $push: { history: history._id } });
 
     return res.status(200).json();
+
   } catch (error) {
     next(error);
   }
