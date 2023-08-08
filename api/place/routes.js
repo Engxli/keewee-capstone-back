@@ -1,7 +1,12 @@
 const express = require("express");
 
 const Place = require("../../models/Place");
-const { getAllPlaces, createPlace, getPlaceById } = require("./controllers");
+const {
+  getAllPlaces,
+  createPlace,
+  getPlaceById,
+  addMoodToPlace,
+} = require("./controllers");
 const upload = require("../../middlewares/multer");
 const passport = require("passport");
 const router = express.Router();
@@ -26,5 +31,7 @@ router.get("/", getAllPlaces);
 router.post("/", upload.single("image"), createPlace);
 
 router.get("/:placeId", getPlaceById);
+
+router.post("/:placeId/:moodId", addMoodToPlace);
 
 module.exports = router;
