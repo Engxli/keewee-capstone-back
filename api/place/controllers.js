@@ -81,3 +81,30 @@ exports.getPlaceAmenities = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.addAmenityToPlace = async (req, res, next) => {
+  try {
+    const { placeId } = req.params;
+    const { amenityId } = req.body;
+
+    const place = await Place.findById(placeId);
+    if (!place) {
+      return res.status(404).json({ message: "Place not found" });
+    }
+
+    if (place.amenities.includes(amenityId)) {
+      return res
+        .status(400)
+        .json({ message: "Amenity already associated with the place" });
+    }
+    place.amenities.push(amenityId);
+
+    await place.save();
+
+    return res
+      .status(200)
+      .json({ message: "Amenity added to place successfully", place });
+  } catch (error) {
+    next(error);
+  }
+};
