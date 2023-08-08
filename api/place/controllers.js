@@ -1,4 +1,3 @@
-
 const Mood = require("../../models/Mood");
 
 const History = require("../../models/History");
@@ -76,8 +75,10 @@ exports.addMoodToPlace = async (req, res, next) => {
     });
 
     res.status(204).end();
-
-
+  } catch (error) {
+    next(error);
+  }
+};
 exports.checkIn = async (req, res, next) => {
   try {
     const place = await Place.findOne({ _id: req.body.place });
@@ -112,7 +113,6 @@ exports.checkIn = async (req, res, next) => {
     await req.user.updateOne({ $push: { history: history._id } });
 
     return res.status(200).json();
-
   } catch (error) {
     next(error);
   }
