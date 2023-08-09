@@ -148,6 +148,13 @@ exports.sendPublicChat = async (req, res, next) => {
         place: place._id,
       });
       await place.updateOne({ $set: { publicChat: createdChat._id } });
+      const msg = await Message.create({
+        from: req.user._id,
+        publicChat: chat._id,
+        text: req.body.msg,
+      });
+      await createdChat.updateOne({ $push: { msgs: msg } });
+      return res.status(201).json(await msg.populate("from", "username image"));
     }
 
     const msg = await Message.create({
