@@ -138,6 +138,9 @@ exports.checkUsername = async (req, res, next) => {
   }
 };
 
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+
 exports.createFriendRequest = async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id).populate("friendRequests");
@@ -217,6 +220,15 @@ exports.declineFriendRequest = async (req, res, next) => {
       $pull: { friendRequests: friendRequest._id },
     });
     res.status(204).end();
+  } catch (error) {
+    return next({ status: 400, message: error.message });
+  }
+};
+
+exports.getMyFriendRequest = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).populate("friendRequests");
+    return res.status(200).json(user.friendRequests);
   } catch (error) {
     return next({ status: 400, message: error.message });
   }
