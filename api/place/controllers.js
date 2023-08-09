@@ -131,8 +131,6 @@ exports.addAmenityToPlace = async (req, res, next) => {
     return res.status(200).json({
       message: "Amenity added to place successfully",
     });
-
-    return res.status(200).json();
   } catch (error) {
     next(error);
   }
