@@ -75,6 +75,7 @@ exports.addMoodToPlace = async (req, res, next) => {
     next(error);
   }
 };
+
 exports.checkIn = async (req, res, next) => {
   try {
     const place = await Place.findOne({ _id: req.body.place });
