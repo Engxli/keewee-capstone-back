@@ -10,6 +10,7 @@ const {
   createFriendRequest,
   declineFriendRequest,
   acceptFriendRequest,
+  getMyFriendRequest,
 } = require("./controllers");
 const router = express.Router();
 const passport = require("passport");
@@ -72,4 +73,9 @@ router.put(
   declineFriendRequest
 );
 
+router.get(
+  "/my-friend-request",
+  passport.authenticate("jwt", { session: false }),
+  getMyFriendRequest
+);
 module.exports = router;
