@@ -2,10 +2,15 @@ const express = require("express");
 
 const Place = require("../../models/Place");
 
-
-const { getAllPlaces, createPlace, getPlaceById, checkIn,addMoodToPlace,  getPlaceAmenities,
-  addAmenityToPlace, } = require("./controllers");
-
+const {
+  getAllPlaces,
+  createPlace,
+  getPlaceById,
+  checkIn,
+  addMoodToPlace,
+  getPlaceAmenities,
+  addAmenityToPlace,
+} = require("./controllers");
 
 const upload = require("../../middlewares/multer");
 const passport = require("passport");
@@ -48,7 +53,11 @@ router.get(
   getPlaceById
 );
 
-router.get("/:placeId/amenities", getPlaceAmenities);
+router.get(
+  "/:placeId/amenities",
+  passport.authenticate("jwt", { session: false }),
+  getPlaceAmenities
+);
 
 router.post(
   "/:placeId/add-amenity",
@@ -56,6 +65,10 @@ router.post(
   addAmenityToPlace
 );
 
-router.post("/:placeId/:moodId", addMoodToPlace);
+router.post(
+  "/:placeId/:moodId",
+  passport.authenticate("jwt", { session: false }),
+  addMoodToPlace
+);
 
 module.exports = router;

@@ -7,6 +7,9 @@ const {
   getProfile,
   getMyProfile,
   checkUsername,
+  createFriendRequest,
+  declineFriendRequest,
+  acceptFriendRequest,
 } = require("./controllers");
 const router = express.Router();
 const passport = require("passport");
@@ -51,8 +54,22 @@ router.post(
 router.post(
   "/sign-in",
   passport.authenticate("local", { session: false }),
-
   signin
+);
+router.post(
+  "/friend-request/:userId",
+  passport.authenticate("jwt", { session: false }),
+  createFriendRequest
+);
+router.put(
+  "/friend-request/accept/:friendRequestId",
+  passport.authenticate("jwt", { session: false }),
+  acceptFriendRequest
+);
+router.put(
+  "/friend-request/decline/:friendRequestId",
+  passport.authenticate("jwt", { session: false }),
+  declineFriendRequest
 );
 
 module.exports = router;
