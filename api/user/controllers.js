@@ -1,7 +1,7 @@
 const User = require("../../models/User");
 const passHash = require("../../utils/auth/passhash");
 const generateToken = require("../../utils/auth/generateToken");
-
+const FriendRequest = require("../../models/FriendRequest");
 
 // Everything with the word user is a placeholder that you'll change in accordance with your project
 
@@ -25,8 +25,9 @@ exports.getUsers = async (req, res, next) => {
 
 exports.getProfile = async (req, res, next) => {
   try {
-    const profile = await User.findById(req.foundUser._id)
-      .select("-__v -password")
+    const profile = await User.findById(req.foundUser._id).select(
+      "-__v -password"
+    );
     return res.status(200).json(profile);
   } catch (error) {
     return next({ status: 400, message: error.message });
@@ -35,8 +36,7 @@ exports.getProfile = async (req, res, next) => {
 
 exports.getMyProfile = async (req, res, next) => {
   try {
-    const profile = await User.findById(req.user._id)
-      .select("-__v -password")
+    const profile = await User.findById(req.user._id).select("-__v -password");
     return res.status(200).json(profile);
   } catch (error) {
     return next({ status: 400, message: error.message });
@@ -138,3 +138,98 @@ exports.checkUsername = async (req, res, next) => {
   }
 };
 
+////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////
+
+exports.createFriendRequest = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).populate("friendRequests");
+
+    if (req.user._id.equals(req.foundUser._id)) {
+      return res
+        .status(400)
+        .json({ message: "You can't send a friend request to yourself!" });
+    }
+    if (req.user.friends.includes(req.foundUser._id)) {
+      return res.status(400).json({ message: "You are already friends!" });
+    }
+    // if (user.friendRequests.includes({ to: req.foundUser._id })) {
+    //   return res
+    //     .status(400)
+    //     .json({ message: "You already sent a friend request!" });
+    // }
+    const friendRequest = await FriendRequest.create({
+      from: req.user._id,
+      to: req.foundUser._id,
+    });
+    await req.user.updateOne({ $push: { friendRequests: friendRequest._id } });
+    await req.foundUser.updateOne({
+      $push: { friendRequests: friendRequest._id },
+    });
+    res.status(201).json(friendRequest);
+  } catch (error) {
+    return next({ status: 400, message: error.message });
+  }
+};
+
+exports.acceptFriendRequest = async (req, res, next) => {
+  try {
+    const { friendRequestId } = req.params;
+    const friendRequest = await FriendRequest.findById(friendRequestId);
+    if (!friendRequest) {
+      return res.status(404).json({ message: "Friend request not found" });
+    }
+    if (!friendRequest.to.equals(req.user._id)) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    await req.user.updateOne({ $push: { friends: friendRequest.from } });
+    await User.findByIdAndUpdate(friendRequest.from, {
+      $push: { friends: req.user._id },
+    });
+    await User.findByIdAndUpdate(friendRequest.to, {
+      $pull: { friendRequests: friendRequest._id },
+    });
+    await User.findByIdAndUpdate(friendRequest.from, {
+      $pull: { friendRequests: friendRequest._id },
+    });
+    await friendRequest.deleteOne();
+    res.status(204).end();
+  } catch (error) {
+    return next({ status: 400, message: error.message });
+  }
+};
+
+exports.declineFriendRequest = async (req, res, next) => {
+  try {
+    const { friendRequestId } = req.params;
+    const friendRequest = await FriendRequest.findById(friendRequestId);
+
+    if (!friendRequest) {
+      return res.status(404).json({ message: "Friend request not found" });
+    }
+
+    if (!friendRequest.to.equals(req.user._id)) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    await friendRequest.deleteOne();
+    await User.findByIdAndUpdate(friendRequest.to, {
+      $pull: { friendRequests: friendRequest._id },
+    });
+    await User.findByIdAndUpdate(friendRequest.from, {
+      $pull: { friendRequests: friendRequest._id },
+    });
+    res.status(204).end();
+  } catch (error) {
+    return next({ status: 400, message: error.message });
+  }
+};
+
+exports.getMyFriendRequest = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id).populate("friendRequests");
+    return res.status(200).json(user.friendRequests);
+  } catch (error) {
+    return next({ status: 400, message: error.message });
+  }
+};

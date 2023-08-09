@@ -30,14 +30,10 @@ exports.createPlace = async (req, res, next) => {
     if (req.file) {
       req.body.image = `${req.file.path}`;
     }
-    const existingPlace = await Place.findOne({
-      name: req.body.name,
-    });
-
+    const existingPlace = await Place.findOne({ name: req.body.name });
     if (existingPlace) {
-      return res.status(400).json({ messge: "place alredy exists" });
+      return res.status(400).json({ messge: "place already exists" });
     }
-
     const place = await Place.create(req.body);
 
     const createdChat = await PublicChat.create({
@@ -89,7 +85,6 @@ exports.checkIn = async (req, res, next) => {
 
     if (req.file) {
       req.body.image = `${req.file.path.replace("\\", "/")}`;
-
       const post = await Post.create({
         image: req.body.image,
         user: req.user._id,
@@ -97,23 +92,46 @@ exports.checkIn = async (req, res, next) => {
       await req.user.updateOne({ $push: { posts: post._id } });
       await place.updateOne({ $push: { posts: post._id } });
     }
-
     if (req.body.rate) {
     }
-
     if (req.body.mood) {
     }
-
     if (req.body.amenityRating) {
     }
-
     const history = await History.create({
       place: place._id,
       user: req.user._id,
     });
     await req.user.updateOne({ $push: { history: history._id } });
-
     return res.status(200).json();
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getPlaceAmenities = async (req, res, next) => {
+  try {
+    await req.place.populate("amenities");
+    res.status(200).json(req.place.amenities);
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.addAmenityToPlace = async (req, res, next) => {
+  try {
+    if (req.place.amenities.includes(amenityId)) {
+      return res
+        .status(400)
+        .json({ message: "Amenity already associated with the place" });
+    }
+    req.place.amenities.push(amenityId);
+
+    await req.place.save();
+
+    return res.status(200).json({
+      message: "Amenity added to place successfully",
+    });
   } catch (error) {
     next(error);
   }

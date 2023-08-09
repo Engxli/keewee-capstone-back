@@ -8,6 +8,8 @@ const {
   getPlaceById,
   checkIn,
   addMoodToPlace,
+  getPlaceAmenities,
+  addAmenityToPlace,
 } = require("./controllers");
 
 const upload = require("../../middlewares/multer");
@@ -31,7 +33,12 @@ router.param("placeId", async (req, res, next, placeId) => {
 
 router.get("/", passport.authenticate("jwt", { session: false }), getAllPlaces);
 
-router.post("/", upload.single("image"), createPlace);
+router.post(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  upload.single("image"),
+  createPlace
+);
 
 router.post(
   "/check-in",
@@ -46,6 +53,22 @@ router.get(
   getPlaceById
 );
 
-router.post("/:placeId/:moodId", addMoodToPlace);
+router.get(
+  "/:placeId/amenities",
+  passport.authenticate("jwt", { session: false }),
+  getPlaceAmenities
+);
+
+router.post(
+  "/:placeId/add-amenity",
+  passport.authenticate("jwt", { session: false }),
+  addAmenityToPlace
+);
+
+router.post(
+  "/:placeId/:moodId",
+  passport.authenticate("jwt", { session: false }),
+  addMoodToPlace
+);
 
 module.exports = router;

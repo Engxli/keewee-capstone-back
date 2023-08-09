@@ -15,7 +15,7 @@ const UserSchema = new Schema(
     mood: { type: Schema.Types.ObjectId, ref: "Mood" },
     chats: [{ type: Schema.Types.ObjectId, ref: "PrivateChat" }],
     ratings: [{ type: Schema.Types.ObjectId, ref: "Rating" }],
-    friendRequest: [{ type: Schema.Types.ObjectId, ref: "FriendRequest" }],
+    friendRequests: [{ type: Schema.Types.ObjectId, ref: "FriendRequest" }],
   },
   { timestamps: true }
 );
