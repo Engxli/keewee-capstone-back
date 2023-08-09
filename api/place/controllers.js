@@ -94,7 +94,6 @@ exports.checkIn = async (req, res, next) => {
     if (req.body.rate) {
     }
     if (req.body.mood) {
-
     }
     if (req.body.amenityRating) {
     }
@@ -109,7 +108,6 @@ exports.checkIn = async (req, res, next) => {
   }
 };
 
-
 exports.getPlaceAmenities = async (req, res, next) => {
   try {
     await req.place.populate("amenities");
@@ -119,10 +117,8 @@ exports.getPlaceAmenities = async (req, res, next) => {
   }
 };
 
-
 exports.addAmenityToPlace = async (req, res, next) => {
   try {
-
     if (req.place.amenities.includes(amenityId)) {
       return res
         .status(400)
@@ -132,12 +128,11 @@ exports.addAmenityToPlace = async (req, res, next) => {
 
     await req.place.save();
 
-    return res
-      .status(200)
-      .json({ message: "Amenity added to place successfully", req.place });
+    return res.status(200).json({
+      message: "Amenity added to place successfully",
+    });
 
     return res.status(200).json();
-
   } catch (error) {
     next(error);
   }
