@@ -17,7 +17,7 @@ exports.createMood = async (req, res, next) => {
     });
 
     if (existingMood) {
-      return res.status(400).json({ messge: "mood alredy exists" });
+      return res.status(400).json({ messge: "mood already exists" });
     }
     const mood = await Mood.create(req.body);
     return res.status(201).json(mood);
