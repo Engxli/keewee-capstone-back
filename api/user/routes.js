@@ -7,6 +7,7 @@ const {
   getProfile,
   getMyProfile,
   checkUsername,
+  addNotificationTokenToUser,
   createFriendRequest,
   declineFriendRequest,
   acceptFriendRequest,
@@ -52,11 +53,17 @@ router.post(
   // FieldValidation,
   createUser
 );
+
 router.post(
   "/sign-in",
   passport.authenticate("local", { session: false }),
   signin
 );
+
+router.put('/store-notification-token',
+  passport.authenticate("jwt", { session: false }),
+  addNotificationTokenToUser)
+
 router.post(
   "/friend-request/:userId",
   passport.authenticate("jwt", { session: false }),

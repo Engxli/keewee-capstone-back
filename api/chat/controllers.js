@@ -85,6 +85,10 @@ exports.sendChat = async (req, res, next) => {
       text: req.body.msg,
     });
     await chat.updateOne({ $push: { msgs: msg } });
+    const otherUser = chat.members.filter(member => !member.equals(req.user._id))[0]
+
+    // const user2 = await User.findOne({ _id: otherUser })
+
     return res.status(201).json(await msg.populate("from", "username image"));
   } catch (error) {
     next(error);
