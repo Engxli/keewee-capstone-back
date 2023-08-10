@@ -48,6 +48,14 @@ io.on("connection", (socket) => {
   socket.on("chat", (data) => {
     socket.broadcast.emit("recieve", data);
   });
+
+  socket.on("joinPublicChat", (chatId) => {
+    socket.join(chatId);
+  });
+
+  socket.on("publicChatSend", (data) => {
+    io.to(data.chatId).emit("publicChatReceive", data);
+  });
 });
 
 server.listen(config.PORT, () => {
