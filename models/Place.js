@@ -6,8 +6,13 @@ const PlaceSchema = new Schema({
   image: { type: String, required: true },
 
   description: { type: String },
+  lon: { type: String },
+  lat: { type: String },
 
-  location: { type: String },
+  // location: {
+  //   type: "Point",
+  //   coordinates: [longitude, latitude],
+  // },
 
   //relation
 

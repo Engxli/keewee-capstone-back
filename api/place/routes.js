@@ -66,10 +66,6 @@ router.put(
   addAmenityToPlace
 );
 
-router.post(
-  "/:placeId/:moodId",
-  passport.authenticate("jwt", { session: false }),
-  addMoodToPlace
-);
+router.post("/:placeId/:moodId", addMoodToPlace);
 
 module.exports = router;

@@ -9,7 +9,7 @@ const Amenity = require("../../models/Amenity");
 
 exports.getAllPlaces = async (req, res, next) => {
   try {
-    const votesLowestLimit = 10;
+    const votesLowestLimit = 5;
     const places = await Place.find().populate("amenities moods");
     // Counting the occurrences of each amenity
     const amenityCounts = {};
@@ -83,6 +83,14 @@ exports.createPlace = async (req, res, next) => {
       req.body.image = `${req.file.path}`;
     }
 
+    // Re-structure location object
+    // if (req.body["location[lat]"] && req.body["location[lon]"]) {
+    //   req.body.location = {
+    //     lat: req.body["location[lat]"],
+    //     lon: req.body["location[lon]"],
+    //   };
+    // }
+
     const existingPlace = await Place.findOne({ name: req.body.name });
     if (existingPlace) {
       return res.status(400).json({ message: "place already exists" });
@@ -103,25 +111,22 @@ exports.createPlace = async (req, res, next) => {
 
 exports.addMoodToPlace = async (req, res, next) => {
   try {
-    const { moodId, placeId } = req.params;
+    const { moodId } = req.params;
 
-    if (!placeId || !moodId) {
-      return res.status(400).json({ error: "Required IDs are missing" });
-    }
     // Checking if the mood exists
     const mood = await Mood.findById(moodId);
     if (!mood) {
       return res.status(404).json({ error: "Mood not found" });
     }
-
+    console.log(req.place);
     // Add the mood to the place's mood array
-    await Place.findByIdAndUpdate(placeId, {
-      $push: { moods: moodId },
+    await req.place.updateOne({
+      $push: { moods: mood._id },
     });
 
     // Add the place to the mood's places array
-    await Mood.findByIdAndUpdate(moodId, {
-      $push: { places: placeId },
+    await mood.updateOne({
+      $push: { places: req.place._id },
     });
 
     res.status(204).end();
