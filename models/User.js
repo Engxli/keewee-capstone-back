@@ -5,13 +5,12 @@ const UserSchema = new Schema(
     username: { type: String, unique: true, required: true },
     password: { type: String, required: true },
     image: { type: String, required: true },
-<<<<<<< HEAD
-
-    location: { lon: { String }, lat: { String } },
-=======
-    location: [{ type: String }],
->>>>>>> origin/main
-
+    location: [
+      {
+        lon: { type: String },
+        lat: { type: String },
+      },
+    ],
     // relation
     posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
     history: [{ type: Schema.Types.ObjectId, ref: "History" }],
