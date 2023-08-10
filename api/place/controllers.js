@@ -30,10 +30,12 @@ exports.createPlace = async (req, res, next) => {
     if (req.file) {
       req.body.image = `${req.file.path}`;
     }
+
     const existingPlace = await Place.findOne({ name: req.body.name });
     if (existingPlace) {
-      return res.status(400).json({ messge: "place already exists" });
+      return res.status(400).json({ message: "place already exists" });
     }
+
     const place = await Place.create(req.body);
 
     const createdChat = await PublicChat.create({
@@ -132,6 +134,27 @@ exports.addAmenityToPlace = async (req, res, next) => {
     return res.status(200).json({
       message: "Amenity added to place successfully",
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getNearbyPlaces = async (req, res, next) => {
+  console.log(req.query);
+  const { lat, lon } = req.query;
+  if (!lat || !lon) {
+    return res
+      .status(400)
+      .json({ message: "Latitude and Longitude are required." });
+  }
+  try {
+    const nearbyPlaces = await Place.find({
+      location: {
+        $near: [parseFloat(lon), parseFloat(lat)],
+        $maxDistance: 0.001, //  in degrees
+      },
+    });
+    res.status(200).json(nearbyPlaces);
   } catch (error) {
     next(error);
   }

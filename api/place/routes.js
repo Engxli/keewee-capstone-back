@@ -10,6 +10,7 @@ const {
   addMoodToPlace,
   getPlaceAmenities,
   addAmenityToPlace,
+  getNearbyPlaces,
 } = require("./controllers");
 
 const upload = require("../../middlewares/multer");
@@ -31,15 +32,15 @@ router.param("placeId", async (req, res, next, placeId) => {
   }
 });
 
-router.get("/", passport.authenticate("jwt", { session: false }), getAllPlaces);
+router.get("/", getAllPlaces);
 
 router.post(
   "/",
-  passport.authenticate("jwt", { session: false }),
+
   upload.single("image"),
   createPlace
 );
-
+router.get("/nearby", getNearbyPlaces);
 router.post(
   "/check-in",
   passport.authenticate("jwt", { session: false }),
