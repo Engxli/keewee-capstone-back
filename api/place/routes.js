@@ -11,6 +11,7 @@ const {
   getPlaceAmenities,
   addAmenityToPlace,
   getNearbyPlaces,
+  getPlacePosts,
 } = require("./controllers");
 
 const upload = require("../../middlewares/multer");
@@ -40,7 +41,15 @@ router.post(
   upload.single("image"),
   createPlace
 );
+
+router.get(
+  "/posts/:placeId",
+  passport.authenticate("jwt", { session: false }),
+  getPlacePosts
+);
+
 // router.get("/nearby", getNearbyPlaces);
+
 router.post(
   "/check-in",
   passport.authenticate("jwt", { session: false }),

@@ -25,6 +25,23 @@ exports.getPlaceById = async (req, res, next) => {
   }
 };
 
+exports.getPlacePosts = async (req, res, next) => {
+  try {
+    const { placeId } = req.params;
+    const place = await Place.findById(placeId)
+      .populate("posts", "image createdAt")
+      .populate({
+        path: "posts",
+        populate: {
+          path: "user",
+          select: "image username",
+        },
+      });
+    res.status(200).json(place.posts);
+  } catch (error) {
+    next(error);
+  }
+};
 exports.createPlace = async (req, res, next) => {
   try {
     if (req.file) {

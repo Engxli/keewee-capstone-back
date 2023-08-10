@@ -36,7 +36,17 @@ exports.getProfile = async (req, res, next) => {
 
 exports.getMyProfile = async (req, res, next) => {
   try {
-    const profile = await User.findById(req.user._id).select("-__v -password");
+    const profile = await User.findById(req.user._id)
+      .select("-__v -password")
+      .populate("posts history", "image createdAt")
+      .populate({
+        path: "history",
+        select: "place createdAt",
+        populate: {
+          path: "place",
+          select: "image name",
+        },
+      });
     return res.status(200).json(profile);
   } catch (error) {
     return next({ status: 400, message: error.message });
@@ -138,19 +148,18 @@ exports.checkUsername = async (req, res, next) => {
   }
 };
 
-
 exports.addNotificationTokenToUser = async (req, res, next) => {
   try {
     await req.user.updateOne({
       $push: {
-        notificationTokens: req.body.token
-      }
-    })
-    res.status(204).end()
+        notificationTokens: req.body.token,
+      },
+    });
+    res.status(204).end();
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
 
 ////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////
@@ -247,4 +256,3 @@ exports.getMyFriendRequest = async (req, res, next) => {
     return next({ status: 400, message: error.message });
   }
 };
-
