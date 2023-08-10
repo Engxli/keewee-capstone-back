@@ -8,6 +8,10 @@ const {
   getMyProfile,
   checkUsername,
   addNotificationTokenToUser,
+  createFriendRequest,
+  declineFriendRequest,
+  acceptFriendRequest,
+  getMyFriendRequest,
 } = require("./controllers");
 const router = express.Router();
 const passport = require("passport");
@@ -53,12 +57,32 @@ router.post(
 router.post(
   "/sign-in",
   passport.authenticate("local", { session: false }),
-
   signin
 );
+
 router.put('/store-notification-token',
   passport.authenticate("jwt", { session: false }),
   addNotificationTokenToUser)
 
+router.post(
+  "/friend-request/:userId",
+  passport.authenticate("jwt", { session: false }),
+  createFriendRequest
+);
+router.put(
+  "/friend-request/accept/:friendRequestId",
+  passport.authenticate("jwt", { session: false }),
+  acceptFriendRequest
+);
+router.delete(
+  "/friend-request/decline/:friendRequestId",
+  passport.authenticate("jwt", { session: false }),
+  declineFriendRequest
+);
 
+router.get(
+  "/my-friend-request",
+  passport.authenticate("jwt", { session: false }),
+  getMyFriendRequest
+);
 module.exports = router;

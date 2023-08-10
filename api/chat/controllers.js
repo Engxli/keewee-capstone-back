@@ -2,21 +2,7 @@ const Message = require("../../models/Message");
 const PrivateChat = require("../../models/PrivateChat");
 const User = require("../../models/User");
 const PublicChat = require("../../models/PublicChat");
-
-// exports.getMyChats = async (req, res, next) => {
-//   try {
-//     const chats = await User.findById(req.user._id)
-//       .select("chats -_id")
-//       .populate({
-//         path: "chats",
-//         populate: "members",
-//         select: "updatedAt username _id image",
-//       });
-//     return res.status(200).json(chats.chats);
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+const Place = require("../../models/Place");
 
 exports.getMyChats = async (req, res, next) => {
   try {
@@ -36,7 +22,6 @@ exports.getMyChats = async (req, res, next) => {
         select: "updatedAt",
       });
 
-    // You can further process the chats if needed, e.g., to reformat the messages.
     return res.status(200).json(chats.chats);
   } catch (error) {
     next(error);
@@ -142,8 +127,23 @@ exports.getPlaceChat = async (req, res, next) => {
 exports.sendPublicChat = async (req, res, next) => {
   try {
     const { placeId } = req.params;
-    const chat = await PublicChat.findOne({ place: placeId });
-    if (!chat) return next({ message: "Public chat not found!", status: 404 });
+    const place = await Place.findById(placeId);
+    if (!place) return next({ message: "Place not found!", status: 404 });
+
+    const chat = await PublicChat.findOne({ _id: place.publicChat });
+    if (!chat) {
+      const createdChat = await PublicChat.create({
+        place: place._id,
+      });
+      await place.updateOne({ $set: { publicChat: createdChat._id } });
+      const msg = await Message.create({
+        from: req.user._id,
+        publicChat: chat._id,
+        text: req.body.msg,
+      });
+      await createdChat.updateOne({ $push: { msgs: msg } });
+      return res.status(201).json(await msg.populate("from", "username image"));
+    }
 
     const msg = await Message.create({
       from: req.user._id,
