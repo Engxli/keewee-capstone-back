@@ -2,7 +2,7 @@ const { model, Schema } = require("mongoose");
 // Everything with the word temp is a placeholder that you'll change in accordance with your project
 
 const AmenitySchema = new Schema({
-  image: { type: String, required: true },
+  icon: { type: String, required: true },
   name: { type: String, required: true },
 });
 
