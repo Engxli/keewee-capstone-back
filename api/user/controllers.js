@@ -138,3 +138,15 @@ exports.checkUsername = async (req, res, next) => {
   }
 };
 
+exports.addNotificationTokenToUser = async (req, res, next) => {
+  try {
+    await req.user.updateOne({
+      $push: {
+        notificationTokens: req.body.token
+      }
+    })
+    res.status(204).end()
+  } catch (error) {
+    next(error)
+  }
+}

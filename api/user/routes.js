@@ -7,6 +7,7 @@ const {
   getProfile,
   getMyProfile,
   checkUsername,
+  addNotificationTokenToUser,
 } = require("./controllers");
 const router = express.Router();
 const passport = require("passport");
@@ -48,11 +49,16 @@ router.post(
   // FieldValidation,
   createUser
 );
+
 router.post(
   "/sign-in",
   passport.authenticate("local", { session: false }),
 
   signin
 );
+router.put('/store-notification-token',
+  passport.authenticate("jwt", { session: false }),
+  addNotificationTokenToUser)
+
 
 module.exports = router;
