@@ -40,7 +40,7 @@ router.post(
   upload.single("image"),
   createPlace
 );
-router.get("/nearby", getNearbyPlaces);
+// router.get("/nearby", getNearbyPlaces);
 router.post(
   "/check-in",
   passport.authenticate("jwt", { session: false }),
