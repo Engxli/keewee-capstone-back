@@ -7,10 +7,7 @@ const PlaceSchema = new Schema({
 
   description: { type: String },
 
-  location: {
-    lon: { type: String },
-    lat: { type: String },
-  },
+  location: { type: String },
 
   //relation
 

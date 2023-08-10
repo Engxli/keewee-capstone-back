@@ -9,6 +9,7 @@ const userRoutes = require("./api/user/routes");
 const chatRoutes = require("./api/chat/routes");
 const placeRoutes = require("./api/place/routes");
 const moodRoutes = require("./api/mood/routes");
+const amenityRoutes = require("./api/amenity/routes");
 
 const config = require("./config/keys");
 const passport = require("passport");
@@ -37,6 +38,7 @@ app.use("/auth", userRoutes);
 app.use("/chat", chatRoutes);
 app.use("/place", placeRoutes);
 app.use("/mood", moodRoutes);
+app.use("/amenity", amenityRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
