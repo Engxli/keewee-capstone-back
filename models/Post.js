@@ -7,6 +7,7 @@ const PostSchema = new Schema(
 
     //relation
     user: { type: Schema.Types.ObjectId, ref: "User" },
+    place: { type: Schema.Types.ObjectId, ref: "Place" },
   },
   { timestamps: true }
 );

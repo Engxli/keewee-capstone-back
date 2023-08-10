@@ -13,3 +13,12 @@ exports.createAmenity = async (req, res, next) => {
     next(error);
   }
 };
+
+exports.getAllAmenities = async (req, res, next) => {
+  try {
+    const amenities = await Amenity.find();
+    res.status(200).json(amenities);
+  } catch (error) {
+    next(error);
+  }
+};

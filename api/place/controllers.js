@@ -5,10 +5,62 @@ const History = require("../../models/History");
 const Place = require("../../models/Place");
 const Post = require("../../models/Post");
 const PublicChat = require("../../models/PublicChat");
+const Amenity = require("../../models/Amenity");
 
 exports.getAllPlaces = async (req, res, next) => {
   try {
-    const places = await Place.find();
+    const votesLowestLimit = 10;
+    const places = await Place.find().populate("amenities moods");
+    // Counting the occurrences of each amenity
+    const amenityCounts = {};
+    places.forEach((place) => {
+      place.amenities.forEach((amenity) => {
+        amenityCounts[amenity._id] = (amenityCounts[amenity._id] || 0) + 1;
+      });
+    });
+
+    // Counting the occurrences of each mood
+    const moodCounts = {};
+    places.forEach((place) => {
+      place.moods.forEach((mood) => {
+        moodCounts[mood._id] = (moodCounts[mood._id] || 0) + 1;
+      });
+    });
+
+    const frequentAmenities = Object.keys(amenityCounts).filter(
+      (key) => amenityCounts[key] > votesLowestLimit
+    );
+    const frequentMoods = Object.keys(moodCounts).filter(
+      (key) => moodCounts[key] > votesLowestLimit
+    );
+
+    const addedAmenities = new Set();
+    const addedMoods = new Set();
+
+    places.forEach((place) => {
+      place.amenities = place.amenities.filter((amenity) => {
+        if (
+          frequentAmenities.includes(amenity._id.toString()) &&
+          !addedAmenities.has(amenity._id.toString())
+        ) {
+          addedAmenities.add(amenity._id.toString());
+          return true;
+        }
+        return false;
+      });
+
+      place.moods = place.moods.filter((mood) => {
+        if (
+          frequentMoods.includes(mood._id.toString()) &&
+          !addedMoods.has(mood._id.toString())
+        ) {
+          addedMoods.add(mood._id.toString());
+          return true;
+        }
+        return false;
+      });
+    });
+
     res.status(200).json(places);
   } catch (error) {
     next(error);
@@ -94,10 +146,17 @@ exports.checkIn = async (req, res, next) => {
     }
     if (req.body.rate) {
     }
-    if (req.body.mood) {
+    if (req.body.moods) {
+      const moodsArray = req.body.moods.split(",");
+      moodsArray.forEach((mood) => place.moods.push(mood));
+      place.save();
     }
-    if (req.body.amenityRating) {
+    if (req.body.amenities) {
+      const amenitiesArray = req.body.amenities.split(",");
+      amenitiesArray.forEach((amenity) => place.amenities.push(amenity));
+      place.save();
     }
+
     const history = await History.create({
       place: place._id,
       user: req.user._id,
@@ -120,12 +179,17 @@ exports.getPlaceAmenities = async (req, res, next) => {
 
 exports.addAmenityToPlace = async (req, res, next) => {
   try {
-    if (req.place.amenities.includes(amenityId)) {
+    const { amenityId } = req.params;
+    const amenity = await Amenity.findById(amenityId);
+    if (!amenity) {
+      return res.status(404).json({ message: "Amenity not found" });
+    }
+    if (req.place.amenities.includes(amenity._id)) {
       return res
         .status(400)
         .json({ message: "Amenity already associated with the place" });
     }
-    req.place.amenities.push(amenityId);
+    req.place.amenities.push(amenity._id);
 
     await req.place.save();
 

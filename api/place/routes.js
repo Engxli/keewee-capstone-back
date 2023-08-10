@@ -59,8 +59,8 @@ router.get(
   getPlaceAmenities
 );
 
-router.post(
-  "/:placeId/add-amenity",
+router.put(
+  "/:placeId/:amenityId",
   passport.authenticate("jwt", { session: false }),
   addAmenityToPlace
 );

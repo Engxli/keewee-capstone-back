@@ -4,21 +4,6 @@ const User = require("../../models/User");
 const PublicChat = require("../../models/PublicChat");
 const Place = require("../../models/Place");
 
-// exports.getMyChats = async (req, res, next) => {
-//   try {
-//     const chats = await User.findById(req.user._id)
-//       .select("chats -_id")
-//       .populate({
-//         path: "chats",
-//         populate: "members",
-//         select: "updatedAt username _id image",
-//       });
-//     return res.status(200).json(chats.chats);
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-
 exports.getMyChats = async (req, res, next) => {
   try {
     const chats = await User.findById(req.user._id)
@@ -37,7 +22,6 @@ exports.getMyChats = async (req, res, next) => {
         select: "updatedAt",
       });
 
-    // You can further process the chats if needed, e.g., to reformat the messages.
     return res.status(200).json(chats.chats);
   } catch (error) {
     next(error);
