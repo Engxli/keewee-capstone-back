@@ -67,7 +67,7 @@ router.put(
   passport.authenticate("jwt", { session: false }),
   acceptFriendRequest
 );
-router.put(
+router.delete(
   "/friend-request/decline/:friendRequestId",
   passport.authenticate("jwt", { session: false }),
   declineFriendRequest

@@ -2,7 +2,7 @@ const express = require("express");
 
 const Place = require("../../models/Place");
 
-const { createAmenity } = require("./controllers");
+const { createAmenity, getAllAmenities } = require("./controllers");
 
 const passport = require("passport");
 const router = express.Router();
@@ -26,6 +26,11 @@ router.post(
   "/",
   passport.authenticate("jwt", { session: false }),
   createAmenity
+);
+router.get(
+  "/",
+  passport.authenticate("jwt", { session: false }),
+  getAllAmenities
 );
 
 module.exports = router;
