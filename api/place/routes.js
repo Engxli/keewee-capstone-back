@@ -41,13 +41,15 @@ router.post(
   upload.single("image"),
   createPlace
 );
-router.get("/nearby", getNearbyPlaces);
 
 router.get(
   "/posts/:placeId",
   passport.authenticate("jwt", { session: false }),
   getPlacePosts
 );
+
+// router.get("/nearby", getNearbyPlaces);
+
 router.post(
   "/check-in",
   passport.authenticate("jwt", { session: false }),
