@@ -12,6 +12,7 @@ const {
   declineFriendRequest,
   acceptFriendRequest,
   getMyFriendRequest,
+  getMyFriends,
 } = require("./controllers");
 const router = express.Router();
 const passport = require("passport");
@@ -46,6 +47,11 @@ router.get(
   passport.authenticate("jwt", { session: false }),
   getMyProfile
 );
+router.get(
+  "/my-friends",
+  passport.authenticate("jwt", { session: false }),
+  getMyFriends
+);
 router.post(
   "/register",
   upload.single("image"),
@@ -60,9 +66,11 @@ router.post(
   signin
 );
 
-router.put('/store-notification-token',
+router.put(
+  "/store-notification-token",
   passport.authenticate("jwt", { session: false }),
-  addNotificationTokenToUser)
+  addNotificationTokenToUser
+);
 
 router.post(
   "/friend-request/:userId",
