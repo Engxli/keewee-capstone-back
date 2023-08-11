@@ -16,7 +16,7 @@ exports.fetchUser = async (userId, next) => {
 
 exports.getUsers = async (req, res, next) => {
   try {
-    const users = await User.find().select("-__v -password -trips");
+    const users = await User.find().select("-__v -password ");
     return res.status(200).json(users);
   } catch (error) {
     return next({ status: 400, message: error.message });
@@ -25,9 +25,17 @@ exports.getUsers = async (req, res, next) => {
 
 exports.getProfile = async (req, res, next) => {
   try {
-    const profile = await User.findById(req.foundUser._id).select(
-      "-__v -password"
-    );
+    const profile = await User.findById(req.foundUser._id)
+      .select("-__v -password")
+      .populate("posts history", "image createdAt")
+      .populate({
+        path: "history",
+        select: "place createdAt",
+        populate: {
+          path: "place",
+          select: "image name",
+        },
+      });
     return res.status(200).json(profile);
   } catch (error) {
     return next({ status: 400, message: error.message });
@@ -52,6 +60,18 @@ exports.getMyProfile = async (req, res, next) => {
     return next({ status: 400, message: error.message });
   }
 };
+
+exports.getMyFriends = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id)
+      .select("friends")
+      .populate("friends");
+    return res.status(200).json(user.friends);
+  } catch (error) {
+    return next({ status: 400, message: error.message });
+  }
+};
+
 exports.createUser = async (req, res, next) => {
   try {
     if (req.file) {
