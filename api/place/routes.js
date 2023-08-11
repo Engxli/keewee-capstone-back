@@ -34,13 +34,10 @@ router.param("placeId", async (req, res, next, placeId) => {
 
 router.get("/", getAllPlaces);
 
-router.post(
-  "/",
+router.post("/", upload.single("image"), createPlace);
 
-  upload.single("image"),
-  createPlace
-);
 router.get("/nearby", getNearbyPlaces);
+
 router.post(
   "/check-in",
   passport.authenticate("jwt", { session: false }),

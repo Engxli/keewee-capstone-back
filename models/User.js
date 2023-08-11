@@ -5,12 +5,18 @@ const UserSchema = new Schema(
     username: { type: String, unique: true, required: true },
     password: { type: String, required: true },
     image: { type: String, required: true },
-    location: [
-      {
-        lon: { type: String },
-        lat: { type: String },
+    location: {
+      type: {
+        type: String,
+        enum: ["Point"],
+        default: "Point",
       },
-    ],
+      coordinates: {
+        type: [Number],
+        required: true,
+      },
+    },
+
     // relation
     posts: [{ type: Schema.Types.ObjectId, ref: "Post" }],
     history: [{ type: Schema.Types.ObjectId, ref: "History" }],
@@ -22,5 +28,6 @@ const UserSchema = new Schema(
   },
   { timestamps: true }
 );
+UserSchema.index({ location: "2dsphere" });
 
 module.exports = model("User", UserSchema);

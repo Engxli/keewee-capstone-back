@@ -3,8 +3,6 @@ const passHash = require("../../utils/auth/passhash");
 const generateToken = require("../../utils/auth/generateToken");
 const FriendRequest = require("../../models/FriendRequest");
 
-// Everything with the word user is a placeholder that you'll change in accordance with your project
-
 exports.fetchUser = async (userId, next) => {
   try {
     const user1 = await User.findById(userId);
@@ -63,12 +61,51 @@ exports.createUser = async (req, res, next) => {
 exports.signin = async (req, res) => {
   try {
     const token = generateToken(req.user);
+
+    // from front-end
+    if (req.body.lon && req.body.lat) {
+      await exports.updateUserLocation(
+        req.user._id,
+        req.body.lon,
+        req.body.lat
+      );
+    }
     return res.status(200).json({ token });
   } catch (error) {
     return next({ status: 400, message: error.message });
   }
 };
+//or
+exports.updateLocationRoute = async (req, res, next) => {
+  try {
+    const { userId, lon, lat } = req.body;
+    await exports.updateUserLocation(userId, lon, lat);
+    res.status(200).json({ message: "Location updated successfully" });
+  } catch (error) {
+    return next({ status: 400, message: error.message });
+  }
+};
+///////////////
+//////////////
 
+exports.updateUserLocation = async (req, res, next) => {
+  const { userId, lon, lat } = req.body;
+
+  try {
+    await User.findByIdAndUpdate(userId, {
+      location: {
+        type: "Point",
+        coordinates: [lon, lat],
+      },
+    });
+    res.status(200).json({ message: "Location updated successfully" });
+  } catch (error) {
+    next(new Error("Error updating user location"));
+  }
+};
+
+/////////////////
+/////////////////
 function getRandomWord(length) {
   let result = "";
   const characters = "abcdefghijklmnopqrstuvwxyz";

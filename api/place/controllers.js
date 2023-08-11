@@ -77,23 +77,56 @@ exports.getPlaceById = async (req, res, next) => {
   }
 };
 
+// exports.createPlace = async (req, res, next) => {
+//   try {
+//     if (req.file) {
+//       req.body.image = `${req.file.path}`;
+//     }
+//     console.log("Received location:", req.body.location);
+
+//     const existingPlace = await Place.findOne({ name: req.body.name });
+//     if (existingPlace) {
+//       return res.status(400).json({ message: "place already exists" });
+//     }
+
+//     const place = await Place.create(req.body);
+
+//     const createdChat = await PublicChat.create({
+//       place: place._id,
+//     });
+//     await place.updateOne({ $set: { publicChat: createdChat._id } });
+
+//     return res.status(201).json(place);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 exports.createPlace = async (req, res, next) => {
   try {
     if (req.file) {
       req.body.image = `${req.file.path}`;
     }
 
-    // Re-structure location object
-    // if (req.body["location[lat]"] && req.body["location[lon]"]) {
-    //   req.body.location = {
-    //     lat: req.body["location[lat]"],
-    //     lon: req.body["location[lon]"],
-    //   };
-    // }
+    // Parsing and validating the location
+    if (typeof req.body.location === "string") {
+      req.body.location = JSON.parse(req.body.location);
+    }
+
+    if (
+      typeof req.body.location !== "object" ||
+      req.body.location.type !== "Point" ||
+      !Array.isArray(req.body.location.coordinates) ||
+      req.body.location.coordinates.length !== 2
+    ) {
+      return res.status(400).json({ message: "Invalid location format" });
+    }
+
+    console.log("Parsed location:", req.body.location);
 
     const existingPlace = await Place.findOne({ name: req.body.name });
     if (existingPlace) {
-      return res.status(400).json({ message: "place already exists" });
+      return res.status(400).json({ message: "Place already exists" });
     }
 
     const place = await Place.create(req.body);
@@ -208,21 +241,64 @@ exports.addAmenityToPlace = async (req, res, next) => {
   }
 };
 
+// exports.getNearbyPlaces = async (req, res, next) => {
+//   console.log(req.query);
+//   const { lat, lon } = req.query;
+//   if (!lat || !lon) {
+//     return res
+//       .status(400)
+//       .json({ message: "Latitude and Longitude are required." });
+//   }
+//   try {
+
+//     // const nearbyPlaces = await Place.find({
+//     //   location: {
+//     //     $near: [parseFloat(lon), parseFloat(lat)],
+//     //     $maxDistance: 0.001, //  in degrees
+//     //   },
+
+//     // }
+//     // );
+//     const nearbyPlaces = await Place.find({
+//       location: {
+//         $near: {
+//           $geometry: {
+//             type: "Point",
+//             coordinates: [parseFloat(lon), parseFloat(lat)],
+//           },
+//           $maxDistance: 100, // 100 meters
+//         },
+//       },
+//     });
+
+//     res.status(200).json(nearbyPlaces);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 exports.getNearbyPlaces = async (req, res, next) => {
-  console.log(req.query);
   const { lat, lon } = req.query;
+
   if (!lat || !lon) {
     return res
       .status(400)
-      .json({ message: "Latitude and Longitude are required." });
+      .send({ message: "Latitude and Longitude are required." });
   }
+
   try {
     const nearbyPlaces = await Place.find({
       location: {
-        $near: [parseFloat(lon), parseFloat(lat)],
-        $maxDistance: 0.001, //  in degrees
+        $near: {
+          $geometry: {
+            type: "Point",
+            coordinates: [parseFloat(lon), parseFloat(lat)], // Longitude first, Latitude second
+          },
+          $maxDistance: 100,
+        },
       },
     });
+
     res.status(200).json(nearbyPlaces);
   } catch (error) {
     next(error);
