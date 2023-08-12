@@ -20,6 +20,7 @@ const UserSchema = new Schema(
     ratings: [{ type: Schema.Types.ObjectId, ref: "Rating" }],
     notificationTokens: [{ type: String, unique: true }],
     friendRequests: [{ type: Schema.Types.ObjectId, ref: "FriendRequest" }],
+    meetupRequests: [{ type: Schema.Types.ObjectId, ref: "MeetUpRequest" }],
   },
   { timestamps: true }
 );
