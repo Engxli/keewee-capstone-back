@@ -59,7 +59,11 @@ router.post(
 );
 
 /////////////
-router.put("/updateLocation", updateUserLocation);
+router.put(
+  "/updateLocation",
+  passport.authenticate("jwt", { session: false }),
+  updateUserLocation
+);
 ////////////
 
 router.post(

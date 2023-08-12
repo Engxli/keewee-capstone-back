@@ -50,6 +50,7 @@ exports.createUser = async (req, res, next) => {
 
     const { password } = req.body;
     req.body.password = await passHash(password);
+    console.log(req.body);
     const newUser = await User.create(req.body);
     const token = generateToken(newUser);
     res.status(201).json({ token });
@@ -89,10 +90,10 @@ exports.updateLocationRoute = async (req, res, next) => {
 //////////////
 
 exports.updateUserLocation = async (req, res, next) => {
-  const { userId, lon, lat } = req.body;
-
   try {
-    await User.findByIdAndUpdate(userId, {
+    const { lon, lat } = req.body;
+    console.log(lon, lat);
+    await req.user.updateOne({
       location: {
         type: "Point",
         coordinates: [lon, lat],
@@ -100,7 +101,7 @@ exports.updateUserLocation = async (req, res, next) => {
     });
     res.status(200).json({ message: "Location updated successfully" });
   } catch (error) {
-    next(new Error("Error updating user location"));
+    next(error);
   }
 };
 

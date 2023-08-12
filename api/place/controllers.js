@@ -104,32 +104,23 @@ exports.getPlaceById = async (req, res, next) => {
 
 exports.createPlace = async (req, res, next) => {
   try {
+    const { lon, lat } = req.body;
     if (req.file) {
       req.body.image = `${req.file.path}`;
     }
-
-    // Parsing and validating the location
-    if (typeof req.body.location === "string") {
-      req.body.location = JSON.parse(req.body.location);
-    }
-
-    if (
-      typeof req.body.location !== "object" ||
-      req.body.location.type !== "Point" ||
-      !Array.isArray(req.body.location.coordinates) ||
-      req.body.location.coordinates.length !== 2
-    ) {
-      return res.status(400).json({ message: "Invalid location format" });
-    }
-
-    console.log("Parsed location:", req.body.location);
 
     const existingPlace = await Place.findOne({ name: req.body.name });
     if (existingPlace) {
       return res.status(400).json({ message: "Place already exists" });
     }
 
-    const place = await Place.create(req.body);
+    const place = await Place.create({
+      ...req.body,
+      location: {
+        type: "Point",
+        coordinates: [lon, lat],
+      },
+    });
 
     const createdChat = await PublicChat.create({
       place: place._id,
@@ -278,23 +269,16 @@ exports.addAmenityToPlace = async (req, res, next) => {
 // };
 
 exports.getNearbyPlaces = async (req, res, next) => {
-  const { lat, lon } = req.query;
-
-  if (!lat || !lon) {
-    return res
-      .status(400)
-      .send({ message: "Latitude and Longitude are required." });
-  }
-
   try {
     const nearbyPlaces = await Place.find({
       location: {
         $near: {
           $geometry: {
             type: "Point",
-            coordinates: [parseFloat(lon), parseFloat(lat)], // Longitude first, Latitude second
+            coordinates: req.user.location.coordinates, // Longitude first, Latitude second
           },
-          $maxDistance: 100,
+          $maxDistance: 50,
+          $minDistance: 1,
         },
       },
     });

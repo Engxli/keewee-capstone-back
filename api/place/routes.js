@@ -36,7 +36,11 @@ router.get("/", getAllPlaces);
 
 router.post("/", upload.single("image"), createPlace);
 
-router.get("/nearby", getNearbyPlaces);
+router.get(
+  "/nearby",
+  passport.authenticate("jwt", { session: false }),
+  getNearbyPlaces
+);
 
 router.post(
   "/check-in",
