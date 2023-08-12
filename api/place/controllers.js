@@ -278,7 +278,7 @@ exports.getNearbyPlaces = async (req, res, next) => {
             coordinates: req.user.location.coordinates, // Longitude first, Latitude second
           },
           $maxDistance: 50,
-          $minDistance: 1,
+          $minDistance: 0,
         },
       },
     });
