@@ -52,13 +52,7 @@ router.get(
   passport.authenticate("jwt", { session: false }),
   getMyFriends
 );
-router.post(
-  "/register",
-  upload.single("image"),
-  // inputValidator([...usernameValidator, ...passwordValidator], true),
-  // FieldValidation,
-  createUser
-);
+router.post("/register", upload.single("image"), createUser);
 
 router.post(
   "/sign-in",
@@ -73,6 +67,7 @@ router.put(
   updateUserLocation
 );
 ////////////
+
 router.put(
   "/store-notification-token",
   passport.authenticate("jwt", { session: false }),
