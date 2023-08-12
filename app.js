@@ -10,6 +10,7 @@ const chatRoutes = require("./api/chat/routes");
 const placeRoutes = require("./api/place/routes");
 const moodRoutes = require("./api/mood/routes");
 const amenityRoutes = require("./api/amenity/routes");
+const meetUpRoutes = require("./api/meetUp/routes");
 
 const config = require("./config/keys");
 const passport = require("passport");
@@ -39,6 +40,7 @@ app.use("/chat", chatRoutes);
 app.use("/place", placeRoutes);
 app.use("/mood", moodRoutes);
 app.use("/amenity", amenityRoutes);
+app.use("/meet-up", meetUpRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
