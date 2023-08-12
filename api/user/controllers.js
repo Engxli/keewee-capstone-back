@@ -119,16 +119,7 @@ exports.signin = async (req, res) => {
     return next({ status: 400, message: error.message });
   }
 };
-//or
-exports.updateLocationRoute = async (req, res, next) => {
-  try {
-    const { userId, lon, lat } = req.body;
-    await exports.updateUserLocation(userId, lon, lat);
-    res.status(200).json({ message: "Location updated successfully" });
-  } catch (error) {
-    return next({ status: 400, message: error.message });
-  }
-};
+
 ///////////////
 //////////////
 
