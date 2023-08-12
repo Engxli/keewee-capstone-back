@@ -28,7 +28,7 @@ exports.getProfile = async (req, res, next) => {
   try {
     const profile = await User.findById(req.foundUser._id)
       .select("-__v -password")
-      .populate("posts history", "image createdAt")
+      .populate("posts history friendRequests", "image createdAt from")
       .populate({
         path: "history",
         select: "place createdAt",
@@ -351,3 +351,13 @@ exports.getMyFriendRequest = async (req, res, next) => {
     return next({ status: 400, message: error.message });
   }
 };
+
+exports.removeFriend = async (req, res, next) => {
+  try {
+    await req.user.updateOne({ $pull: { friends: req.foundUser._id } })
+    await req.foundUser.updateOne({ $pull: { friends: req.user._id } })
+    return res.status(204).end();
+  } catch (error) {
+    return next({ status: 400, message: error.message });
+  }
+}

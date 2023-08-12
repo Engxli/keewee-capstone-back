@@ -13,6 +13,7 @@ const {
   acceptFriendRequest,
   getMyFriendRequest,
   getMyFriends,
+  removeFriend,
 } = require("./controllers");
 const router = express.Router();
 const passport = require("passport");
@@ -77,11 +78,18 @@ router.post(
   passport.authenticate("jwt", { session: false }),
   createFriendRequest
 );
+
 router.put(
   "/friend-request/accept/:friendRequestId",
   passport.authenticate("jwt", { session: false }),
   acceptFriendRequest
 );
+router.put(
+  "/friends/remove/:userId",
+  passport.authenticate("jwt", { session: false }),
+  removeFriend
+);
+
 router.delete(
   "/friend-request/decline/:friendRequestId",
   passport.authenticate("jwt", { session: false }),
@@ -93,4 +101,5 @@ router.get(
   passport.authenticate("jwt", { session: false }),
   getMyFriendRequest
 );
+
 module.exports = router;
