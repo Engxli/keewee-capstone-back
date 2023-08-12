@@ -3,6 +3,7 @@ const PrivateChat = require("../../models/PrivateChat");
 const User = require("../../models/User");
 const PublicChat = require("../../models/PublicChat");
 const Place = require("../../models/Place");
+const { createMsgNotification, sendNotificationMsgs } = require("../../utils/notifications");
 
 exports.getMyChats = async (req, res, next) => {
   try {
@@ -77,7 +78,7 @@ exports.getChat = async (req, res, next) => {
 exports.sendChat = async (req, res, next) => {
   try {
     const { chatId } = req.params;
-    const chat = await PrivateChat.findById(chatId);
+    const chat = await PrivateChat.findById(chatId).populate("members");
     if (!chat) return next({ message: "chat not found!", status: 404 });
     const msg = await Message.create({
       from: req.user._id,
@@ -85,6 +86,17 @@ exports.sendChat = async (req, res, next) => {
       text: req.body.msg,
     });
     await chat.updateOne({ $push: { msgs: msg } });
+    const otherUser = chat.members.filter(member => !member.equals(req.user._id))[0]
+
+    let msgs = [];
+    otherUser.notificationTokens.forEach((token) => {
+      msgs.push(createMsgNotification(token,
+        `${req.user.username} sent you a message`,
+        req.body.msg))
+    });
+    sendNotificationMsgs(msgs);
+    // const user2 = await User.findOne({ _id: otherUser })
+
     return res.status(201).json(await msg.populate("from", "username image"));
   } catch (error) {
     next(error);

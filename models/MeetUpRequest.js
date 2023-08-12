@@ -1,7 +1,7 @@
 const { model, Schema } = require("mongoose");
 // Everything with the word temp is a placeholder that you'll change in accordance with your project
 
-const FriendRequestSchema = new Schema(
+const MeetUpRequestSchema = new Schema(
   {
     // relation
     from: { type: Schema.Types.ObjectId, ref: "User" },
@@ -10,4 +10,4 @@ const FriendRequestSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = model("FriendRequest", FriendRequestSchema);
+module.exports = model("MeetUpRequest", MeetUpRequestSchema);

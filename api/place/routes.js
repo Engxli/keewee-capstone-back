@@ -11,6 +11,7 @@ const {
   getPlaceAmenities,
   addAmenityToPlace,
   getNearbyPlaces,
+  getPlacePosts,
 } = require("./controllers");
 
 const upload = require("../../middlewares/multer");
