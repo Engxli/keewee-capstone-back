@@ -2,6 +2,7 @@ const User = require("../../models/User");
 const passHash = require("../../utils/auth/passhash");
 const generateToken = require("../../utils/auth/generateToken");
 const FriendRequest = require("../../models/FriendRequest");
+const { sendNotificationMsgs } = require("../../utils/notifications");
 
 // Everything with the word user is a placeholder that you'll change in accordance with your project
 
@@ -35,7 +36,7 @@ exports.getProfile = async (req, res, next) => {
           path: "place",
           select: "image name",
         },
-      });
+      })
     return res.status(200).json(profile);
   } catch (error) {
     return next({ status: 400, message: error.message });
@@ -53,6 +54,17 @@ exports.getMyProfile = async (req, res, next) => {
         populate: {
           path: "place",
           select: "image name",
+        },
+      }).populate({
+        path: "friends",
+        select: "image username",
+      })
+      .populate({
+        path: "friendRequests",
+        select: "from to",
+        populate: {
+          path: "from to",
+          select: "image username",
         },
       });
     return res.status(200).json(profile);
@@ -82,6 +94,7 @@ exports.createUser = async (req, res, next) => {
 
     const { password } = req.body;
     req.body.password = await passHash(password);
+    req.body.notificationTokens = [];
     const newUser = await User.create(req.body);
     const token = generateToken(newUser);
     res.status(201).json({ token });
@@ -170,6 +183,13 @@ exports.checkUsername = async (req, res, next) => {
 
 exports.addNotificationTokenToUser = async (req, res, next) => {
   try {
+    const foundToken = req.user.notificationTokens.find(
+      (token) => token === req.body.token
+    );
+
+    if (foundToken) {
+      return res.status(204).end();
+    }
     await req.user.updateOne({
       $push: {
         notificationTokens: req.body.token,
@@ -186,29 +206,73 @@ exports.addNotificationTokenToUser = async (req, res, next) => {
 
 exports.createFriendRequest = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user._id).populate("friendRequests");
+    // const user = await User.findById(req.user._id).populate("friendRequests");
 
     if (req.user._id.equals(req.foundUser._id)) {
       return res
         .status(400)
         .json({ message: "You can't send a friend request to yourself!" });
     }
+
     if (req.user.friends.includes(req.foundUser._id)) {
       return res.status(400).json({ message: "You are already friends!" });
     }
-    // if (user.friendRequests.includes({ to: req.foundUser._id })) {
-    //   return res
-    //     .status(400)
-    //     .json({ message: "You already sent a friend request!" });
-    // }
+
+    const friendRequestExists = await FriendRequest.findOne({
+      from: req.user._id,
+      to: req.foundUser._id,
+    });
+
+    if (friendRequestExists) {
+      return res
+        .status(400)
+        .json({ message: "You already sent a friend request!" });
+    }
+
+    const friendRequestExists2 = await FriendRequest.findOne({
+      from: req.foundUser._id,
+      to: req.user._id,
+    });
+
+    if (friendRequestExists2) {
+      // add frined
+      await req.user.updateOne({ $push: { friends: req.foundUser._id } });
+      await req.foundUser.updateOne({ $push: { friends: req.user._id } });
+
+      await req.user.updateOne({
+        $pull: { friendRequests: friendRequestExists2._id },
+      });
+
+      await req.foundUser.updateOne({
+        $pull: { friendRequests: friendRequestExists2._id },
+      });
+
+      await friendRequestExists2.deleteOne();
+
+      return res.status(200).json({ message: "Friend request accepted" });
+    }
+
     const friendRequest = await FriendRequest.create({
       from: req.user._id,
       to: req.foundUser._id,
     });
-    await req.user.updateOne({ $push: { friendRequests: friendRequest._id } });
+    await req.user.updateOne({
+      $push: { friendRequests: friendRequest._id },
+    });
     await req.foundUser.updateOne({
       $push: { friendRequests: friendRequest._id },
     });
+    let msgs = [];
+    req.foundUser.notificationTokens.forEach((token) => {
+      msgs.push({
+        to: token,
+        sound: "default",
+        title: "New Friend Request",
+        body: `${req.user.username} sent you a friend request`,
+      });
+    });
+    await sendNotificationMsgs(msgs);
+
     res.status(201).json(friendRequest);
   } catch (error) {
     return next({ status: 400, message: error.message });
@@ -218,7 +282,7 @@ exports.createFriendRequest = async (req, res, next) => {
 exports.acceptFriendRequest = async (req, res, next) => {
   try {
     const { friendRequestId } = req.params;
-    const friendRequest = await FriendRequest.findById(friendRequestId);
+    const friendRequest = await FriendRequest.findById(friendRequestId).populate("from");;
     if (!friendRequest) {
       return res.status(404).json({ message: "Friend request not found" });
     }
@@ -236,6 +300,17 @@ exports.acceptFriendRequest = async (req, res, next) => {
       $pull: { friendRequests: friendRequest._id },
     });
     await friendRequest.deleteOne();
+    let msgs = [];
+    friendRequest.from.notificationTokens.forEach((token) => {
+      msgs.push({
+        to: token,
+        sound: "default",
+        title: "Friend Request Accepted",
+        body: `${req.user.username} accepted your friend request`,
+      });
+    });
+    await sendNotificationMsgs(msgs);
+
     res.status(204).end();
   } catch (error) {
     return next({ status: 400, message: error.message });
