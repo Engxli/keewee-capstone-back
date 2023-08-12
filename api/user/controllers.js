@@ -133,7 +133,7 @@ exports.updateUserLocation = async (req, res, next) => {
         coordinates: [lon, lat],
       },
     });
-    res.status(200).json({ message: "Location updated successfully" });
+    res.status(200).json({ coordinates: [lon, lat] });
   } catch (error) {
     next(error);
   }
@@ -385,10 +385,10 @@ exports.getMyFriendRequest = async (req, res, next) => {
 
 exports.removeFriend = async (req, res, next) => {
   try {
-    await req.user.updateOne({ $pull: { friends: req.foundUser._id } })
-    await req.foundUser.updateOne({ $pull: { friends: req.user._id } })
+    await req.user.updateOne({ $pull: { friends: req.foundUser._id } });
+    await req.foundUser.updateOne({ $pull: { friends: req.user._id } });
     return res.status(204).end();
   } catch (error) {
     return next({ status: 400, message: error.message });
   }
-}
+};

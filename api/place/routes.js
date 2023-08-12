@@ -55,6 +55,11 @@ router.get(
   passport.authenticate("jwt", { session: false }),
   getPlaceById
 );
+router.get(
+  "/posts/:placeId",
+  passport.authenticate("jwt", { session: false }),
+  getPlacePosts
+);
 
 router.get(
   "/:placeId/amenities",
