@@ -3,17 +3,20 @@ const { model, Schema } = require("mongoose");
 const PlaceSchema = new Schema({
   name: { type: String, required: true },
 
-  image: { type: String, required: true },
+  image: { type: String, required: false },
 
-  description: { type: String },
-  lon: { type: String },
-  lat: { type: String },
-
-  // location: {
-  //   type: "Point",
-  //   coordinates: [longitude, latitude],
-  // },
-
+  location: {
+    type: {
+      type: String,
+      enum: ["Point"],
+      default: "Point",
+    },
+    coordinates: {
+      type: [Number],
+      required: true,
+      default: [0, 0],
+    },
+  },
   //relation
 
   ratings: [{ type: Schema.Types.ObjectId, ref: "Rating" }],
@@ -28,5 +31,6 @@ const PlaceSchema = new Schema({
 
   publicChat: { type: Schema.Types.ObjectId, ref: "PublicChat" },
 });
+PlaceSchema.index({ location: "2dsphere" });
 
 module.exports = model("Place", PlaceSchema);

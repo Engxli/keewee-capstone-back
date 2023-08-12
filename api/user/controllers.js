@@ -4,8 +4,6 @@ const generateToken = require("../../utils/auth/generateToken");
 const FriendRequest = require("../../models/FriendRequest");
 const { sendNotificationMsgs } = require("../../utils/notifications");
 
-// Everything with the word user is a placeholder that you'll change in accordance with your project
-
 exports.fetchUser = async (userId, next) => {
   try {
     const user1 = await User.findById(userId);
@@ -36,7 +34,7 @@ exports.getProfile = async (req, res, next) => {
           path: "place",
           select: "image name",
         },
-      })
+      });
     return res.status(200).json(profile);
   } catch (error) {
     return next({ status: 400, message: error.message });
@@ -55,7 +53,8 @@ exports.getMyProfile = async (req, res, next) => {
           path: "place",
           select: "image name",
         },
-      }).populate({
+      })
+      .populate({
         path: "friends",
         select: "image username",
       })
@@ -106,12 +105,51 @@ exports.createUser = async (req, res, next) => {
 exports.signin = async (req, res) => {
   try {
     const token = generateToken(req.user);
+
+    // from front-end
+    if (req.body.lon && req.body.lat) {
+      await exports.updateUserLocation(
+        req.user._id,
+        req.body.lon,
+        req.body.lat
+      );
+    }
     return res.status(200).json({ token });
   } catch (error) {
     return next({ status: 400, message: error.message });
   }
 };
+//or
+exports.updateLocationRoute = async (req, res, next) => {
+  try {
+    const { userId, lon, lat } = req.body;
+    await exports.updateUserLocation(userId, lon, lat);
+    res.status(200).json({ message: "Location updated successfully" });
+  } catch (error) {
+    return next({ status: 400, message: error.message });
+  }
+};
+///////////////
+//////////////
 
+exports.updateUserLocation = async (req, res, next) => {
+  try {
+    const { lon, lat } = req.body;
+    console.log(lon, lat);
+    await req.user.updateOne({
+      location: {
+        type: "Point",
+        coordinates: [lon, lat],
+      },
+    });
+    res.status(200).json({ message: "Location updated successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/////////////////
+/////////////////
 function getRandomWord(length) {
   let result = "";
   const characters = "abcdefghijklmnopqrstuvwxyz";
@@ -282,7 +320,9 @@ exports.createFriendRequest = async (req, res, next) => {
 exports.acceptFriendRequest = async (req, res, next) => {
   try {
     const { friendRequestId } = req.params;
-    const friendRequest = await FriendRequest.findById(friendRequestId).populate("from");;
+    const friendRequest = await FriendRequest.findById(
+      friendRequestId
+    ).populate("from");
     if (!friendRequest) {
       return res.status(404).json({ message: "Friend request not found" });
     }

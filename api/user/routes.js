@@ -12,6 +12,7 @@ const {
   declineFriendRequest,
   acceptFriendRequest,
   getMyFriendRequest,
+  updateUserLocation,
   getMyFriends,
 } = require("./controllers");
 const router = express.Router();
@@ -23,7 +24,6 @@ const {
   inputValidator,
   FieldValidation,
 } = require("../../middlewares/userValidation");
-// Everything with the word user is a placeholder that you'll change in accordance with your project
 
 router.param("userId", async (req, res, next, userId) => {
   try {
@@ -66,6 +66,13 @@ router.post(
   signin
 );
 
+/////////////
+router.put(
+  "/updateLocation",
+  passport.authenticate("jwt", { session: false }),
+  updateUserLocation
+);
+////////////
 router.put(
   "/store-notification-token",
   passport.authenticate("jwt", { session: false }),

@@ -42,16 +42,26 @@ exports.getPlacePosts = async (req, res, next) => {
     next(error);
   }
 };
+
 exports.createPlace = async (req, res, next) => {
   try {
+    const { lon, lat } = req.body;
     if (req.file) {
       req.body.image = `${req.file.path}`;
     }
+
     const existingPlace = await Place.findOne({ name: req.body.name });
     if (existingPlace) {
-      return res.status(400).json({ messge: "place already exists" });
+      return res.status(400).json({ message: "Place already exists" });
     }
-    const place = await Place.create(req.body);
+
+    const place = await Place.create({
+      ...req.body,
+      location: {
+        type: "Point",
+        coordinates: [lon, lat],
+      },
+    });
 
     const createdChat = await PublicChat.create({
       place: place._id,
@@ -148,6 +158,27 @@ exports.addAmenityToPlace = async (req, res, next) => {
     return res.status(200).json({
       message: "Amenity added to place successfully",
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getNearbyPlaces = async (req, res, next) => {
+  try {
+    const nearbyPlaces = await Place.find({
+      location: {
+        $near: {
+          $geometry: {
+            type: "Point",
+            coordinates: req.user.location.coordinates, // Longitude first, Latitude second
+          },
+          $maxDistance: 50,
+          $minDistance: 0,
+        },
+      },
+    });
+
+    res.status(200).json(nearbyPlaces);
   } catch (error) {
     next(error);
   }
