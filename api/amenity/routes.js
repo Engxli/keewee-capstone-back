@@ -5,6 +5,7 @@ const Place = require("../../models/Place");
 const { createAmenity, getAllAmenities } = require("./controllers");
 
 const passport = require("passport");
+
 const router = express.Router();
 
 router.param("placeId", async (req, res, next, placeId) => {

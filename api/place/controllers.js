@@ -42,7 +42,6 @@ exports.getPlacePosts = async (req, res, next) => {
     next(error);
   }
 };
-
 exports.createPlace = async (req, res, next) => {
   try {
     const { lon, lat } = req.body;
@@ -73,7 +72,6 @@ exports.createPlace = async (req, res, next) => {
     next(error);
   }
 };
-
 exports.addMoodToPlace = async (req, res, next) => {
   try {
     const { moodId, placeId } = req.params;
@@ -134,7 +132,6 @@ exports.checkIn = async (req, res, next) => {
     next(error);
   }
 };
-
 exports.getPlaceAmenities = async (req, res, next) => {
   try {
     await req.place.populate("amenities");

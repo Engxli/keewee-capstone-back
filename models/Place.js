@@ -19,7 +19,7 @@ const PlaceSchema = new Schema({
   },
   //relation
 
-  ratings: [{ type: Schema.Types.ObjectId, ref: "Rating" }],
+  ratings: { type: Number },
 
   amenitiesRatings: [{ type: Schema.Types.ObjectId, ref: "AmenityRating" }],
 
@@ -31,6 +31,7 @@ const PlaceSchema = new Schema({
 
   publicChat: { type: Schema.Types.ObjectId, ref: "PublicChat" },
 });
+
 PlaceSchema.index({ location: "2dsphere" });
 
 module.exports = model("Place", PlaceSchema);
