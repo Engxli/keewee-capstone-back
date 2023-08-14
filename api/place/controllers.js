@@ -11,33 +11,30 @@ exports.getAllPlaces = async (req, res, next) => {
   try {
     const votesLowestLimit = 5;
     const places = await Place.find().populate("amenities moods");
-    // Counting the occurrences of each amenity
-    const amenityCounts = {};
-    places.forEach((place) => {
+
+    // Iterate through each place and apply the logic separately
+    const modifiedPlaces = places.map((place) => {
+      const amenityCounts = {};
+      const moodCounts = {};
+
       place.amenities.forEach((amenity) => {
         amenityCounts[amenity._id] = (amenityCounts[amenity._id] || 0) + 1;
       });
-    });
 
-    // Counting the occurrences of each mood
-    const moodCounts = {};
-    places.forEach((place) => {
       place.moods.forEach((mood) => {
         moodCounts[mood._id] = (moodCounts[mood._id] || 0) + 1;
       });
-    });
 
-    const frequentAmenities = Object.keys(amenityCounts).filter(
-      (key) => amenityCounts[key] > votesLowestLimit
-    );
-    const frequentMoods = Object.keys(moodCounts).filter(
-      (key) => moodCounts[key] > votesLowestLimit
-    );
+      const frequentAmenities = Object.keys(amenityCounts).filter(
+        (key) => amenityCounts[key] > votesLowestLimit
+      );
+      const frequentMoods = Object.keys(moodCounts).filter(
+        (key) => moodCounts[key] > votesLowestLimit
+      );
 
-    const addedAmenities = new Set();
-    const addedMoods = new Set();
+      const addedAmenities = new Set();
+      const addedMoods = new Set();
 
-    places.forEach((place) => {
       place.amenities = place.amenities.filter((amenity) => {
         if (
           frequentAmenities.includes(amenity._id.toString()) &&
@@ -59,9 +56,11 @@ exports.getAllPlaces = async (req, res, next) => {
         }
         return false;
       });
+
+      return place;
     });
 
-    res.status(200).json(places);
+    res.status(200).json(modifiedPlaces);
   } catch (error) {
     next(error);
   }
@@ -92,12 +91,30 @@ exports.getPlaceById = async (req, res, next) => {
       (key) => moodCounts[key] > votesLowestLimit
     );
 
-    place.amenities = place.amenities.filter((amenity) =>
-      frequentAmenities.includes(amenity._id.toString())
-    );
-    place.moods = place.moods.filter((mood) =>
-      frequentMoods.includes(mood._id.toString())
-    );
+    const addedAmenities = new Set();
+    const addedMoods = new Set();
+
+    place.amenities = place.amenities.filter((amenity) => {
+      if (
+        frequentAmenities.includes(amenity._id.toString()) &&
+        !addedAmenities.has(amenity._id.toString())
+      ) {
+        addedAmenities.add(amenity._id.toString());
+        return true;
+      }
+      return false;
+    });
+
+    place.moods = place.moods.filter((mood) => {
+      if (
+        frequentMoods.includes(mood._id.toString()) &&
+        !addedMoods.has(mood._id.toString())
+      ) {
+        addedMoods.add(mood._id.toString());
+        return true;
+      }
+      return false;
+    });
 
     res.status(200).json(place);
   } catch (error) {
@@ -217,14 +234,12 @@ exports.checkIn = async (req, res, next) => {
     if (req.body.moods) {
       const moodsArray = req.body.moods.split(",");
       moodsArray.forEach((mood) => place.moods.push(mood));
-      place.save();
     }
     if (req.body.amenities) {
       const amenitiesArray = req.body.amenities.split(",");
       amenitiesArray.forEach((amenity) => place.amenities.push(amenity));
-      place.save();
     }
-
+    place.save();
     const history = await History.create({
       place: place._id,
       user: req.user._id,
