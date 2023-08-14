@@ -17,9 +17,10 @@ const PlaceSchema = new Schema({
       default: [0, 0],
     },
   },
+
   //relation
 
-  ratings: { type: Number },
+  ratings: { type: Number, default: 0 },
 
   amenitiesRatings: [{ type: Schema.Types.ObjectId, ref: "AmenityRating" }],
 
