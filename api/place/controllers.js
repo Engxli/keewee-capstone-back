@@ -165,17 +165,31 @@ exports.addMoodToPlace = async (req, res, next) => {
       return res.status(404).json({ error: "Mood not found" });
     }
 
-    // Add the mood to the place's mood array
-    await Place.findByIdAndUpdate(placeId, {
-      $push: { moods: moodId },
+    // Checking if the place exists
+    const place = await Place.findById(placeId);
+    if (!place) {
+      return res.status(404).json({ error: "place not found" });
+    }
+
+    await mood.updateOne({
+      $push: { places: place._id },
     });
 
-    // Add the place to the mood's places array
-    await Mood.findByIdAndUpdate(moodId, {
-      $push: { places: placeId },
+    await place.updateOne({
+      $push: { moods: mood._id },
     });
 
-    res.status(204).end();
+    // // Add the mood to the place's mood array
+    // await Place.findByIdAndUpdate(placeId, {
+    //   $push: { moods: moodId },
+    // });
+
+    // // Add the place to the mood's places array
+    // await Mood.findByIdAndUpdate(moodId, {
+    //   $push: { places: placeId },
+    // });
+    // console.log("DONE");
+    res.status(201).json(place);
   } catch (error) {
     next(error);
   }
@@ -196,8 +210,10 @@ exports.checkIn = async (req, res, next) => {
       await req.user.updateOne({ $push: { posts: post._id } });
       await place.updateOne({ $push: { posts: post._id } });
     }
+
     if (req.body.rate) {
     }
+
     if (req.body.moods) {
       const moodsArray = req.body.moods.split(",");
       moodsArray.forEach((mood) => place.moods.push(mood));
