@@ -33,7 +33,6 @@ app.use(passport.initialize());
 passport.use("local", localStrategy);
 passport.use(jwtStrategy);
 
-// Everything with the word temp is a placeholder that you'll change in accordance with your project
 app.use("/media", express.static(path.join(__dirname, "media")));
 app.use("/auth", userRoutes);
 app.use("/chat", chatRoutes);
