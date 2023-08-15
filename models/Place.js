@@ -5,6 +5,8 @@ const PlaceSchema = new Schema({
 
   image: { type: String, required: false },
 
+  description: { type: String },
+
   location: {
     type: {
       type: String,

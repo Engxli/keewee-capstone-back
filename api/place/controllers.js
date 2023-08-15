@@ -7,65 +7,6 @@ const Post = require("../../models/Post");
 const PublicChat = require("../../models/PublicChat");
 const Amenity = require("../../models/Amenity");
 
-exports.getAllPlaces = async (req, res, next) => {
-  try {
-    const votesLowestLimit = 5;
-    const places = await Place.find().populate("amenities moods");
-
-    // Iterate through each place and apply the logic separately
-    const modifiedPlaces = places.map((place) => {
-      const amenityCounts = {};
-      const moodCounts = {};
-
-      place.amenities.forEach((amenity) => {
-        amenityCounts[amenity._id] = (amenityCounts[amenity._id] || 0) + 1;
-      });
-
-      place.moods.forEach((mood) => {
-        moodCounts[mood._id] = (moodCounts[mood._id] || 0) + 1;
-      });
-
-      const frequentAmenities = Object.keys(amenityCounts).filter(
-        (key) => amenityCounts[key] > votesLowestLimit
-      );
-      const frequentMoods = Object.keys(moodCounts).filter(
-        (key) => moodCounts[key] > votesLowestLimit
-      );
-
-      const addedAmenities = new Set();
-      const addedMoods = new Set();
-
-      place.amenities = place.amenities.filter((amenity) => {
-        if (
-          frequentAmenities.includes(amenity._id.toString()) &&
-          !addedAmenities.has(amenity._id.toString())
-        ) {
-          addedAmenities.add(amenity._id.toString());
-          return true;
-        }
-        return false;
-      });
-
-      place.moods = place.moods.filter((mood) => {
-        if (
-          frequentMoods.includes(mood._id.toString()) &&
-          !addedMoods.has(mood._id.toString())
-        ) {
-          addedMoods.add(mood._id.toString());
-          return true;
-        }
-        return false;
-      });
-
-      return place;
-    });
-
-    res.status(200).json(modifiedPlaces);
-  } catch (error) {
-    next(error);
-  }
-};
-
 exports.getPlaceById = async (req, res, next) => {
   try {
     const { placeId } = req.params;
@@ -283,6 +224,65 @@ exports.addAmenityToPlace = async (req, res, next) => {
   }
 };
 
+const modifyPlaceData = (places) => {
+  const votesLowestLimit = 5;
+  return places.map((place) => {
+    const amenityCounts = {};
+    const moodCounts = {};
+
+    place.amenities.forEach((amenity) => {
+      amenityCounts[amenity._id] = (amenityCounts[amenity._id] || 0) + 1;
+    });
+
+    place.moods.forEach((mood) => {
+      moodCounts[mood._id] = (moodCounts[mood._id] || 0) + 1;
+    });
+
+    const frequentAmenities = Object.keys(amenityCounts).filter(
+      (key) => amenityCounts[key] > votesLowestLimit
+    );
+    const frequentMoods = Object.keys(moodCounts).filter(
+      (key) => moodCounts[key] > votesLowestLimit
+    );
+
+    const addedAmenities = new Set();
+    const addedMoods = new Set();
+
+    place.amenities = place.amenities.filter((amenity) => {
+      if (
+        frequentAmenities.includes(amenity._id.toString()) &&
+        !addedAmenities.has(amenity._id.toString())
+      ) {
+        addedAmenities.add(amenity._id.toString());
+        return true;
+      }
+      return false;
+    });
+
+    place.moods = place.moods.filter((mood) => {
+      if (
+        frequentMoods.includes(mood._id.toString()) &&
+        !addedMoods.has(mood._id.toString())
+      ) {
+        addedMoods.add(mood._id.toString());
+        return true;
+      }
+      return false;
+    });
+
+    return place;
+  });
+};
+
+exports.getAllPlaces = async (req, res, next) => {
+  try {
+    const places = await Place.find().populate("amenities moods");
+    const modifiedPlaces = modifyPlaceData(places);
+    res.status(200).json(modifiedPlaces);
+  } catch (error) {
+    next(error);
+  }
+};
 exports.getNearbyPlaces = async (req, res, next) => {
   try {
     const nearbyPlaces = await Place.find({
@@ -296,9 +296,10 @@ exports.getNearbyPlaces = async (req, res, next) => {
           $minDistance: 0,
         },
       },
-    });
+    }).populate("amenities moods"); // Populate amenities and moods
 
-    res.status(200).json(nearbyPlaces);
+    const modifiedNearbyPlaces = modifyPlaceData(nearbyPlaces);
+    res.status(200).json(modifiedNearbyPlaces);
   } catch (error) {
     next(error);
   }
