@@ -86,7 +86,8 @@ exports.getMyFriends = async (req, res, next) => {
 exports.createUser = async (req, res, next) => {
   try {
     if (req.file) {
-      req.body.image = `${req.file.path.replace("\\", "/")}`;
+      req.body.image = req.file.location;
+      console.log(req.file);
     }
     if (!req.body.image)
       return next({ status: 400, message: "no image was uploaded!" });
